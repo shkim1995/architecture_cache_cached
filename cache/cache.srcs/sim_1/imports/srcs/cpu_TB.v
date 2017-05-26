@@ -9,26 +9,56 @@ module cpu_TB();
 	reg reset_n;	// active-low RESET signal
 	reg clk;		// clock signal	
 	
+    
+    //debugging cache interface
+    wire i_readC;
+    wire[`WORD_SIZE-1:0] i_addrC;
+    wire i_readyC;
+    wire[`WORD_SIZE-1:0] i_dataC;
+    
+    wire d_readC;
+    wire d_writeC;
+    wire[`WORD_SIZE-1:0] d_addrC;
+    wire d_readyC;
+    wire[`WORD_SIZE-1:0] d_dataC;
+    
+    
 	// Instruction memory interface
 	wire i_readM;
 	wire i_writeM;
 	wire [`WORD_SIZE-1:0] i_address;
-	wire [`WORD_SIZE-1:0] i_data;		
+	wire [`WORD_SIZE*4-1:0] i_data;		
+	
+	
+	// Data memory interface
+	wire d_readM;
+	wire d_writeM;
+	wire [`WORD_SIZE-1:0] d_address;
+	wire [`WORD_SIZE*4-1:0] d_data;
 	
 	wire i_ready;
 	wire d_ready;
 	
 	wire[7:0] d_count;
 	
-	// Data memory interface
-	wire d_readM;
-	wire d_writeM;
-	wire [`WORD_SIZE-1:0] d_address;
-	wire [`WORD_SIZE-1:0] d_data;
+	
+	
+    //for counting hits and misses
+    
+    wire[15:0] i_hit;
+    wire[15:0] i_miss;
+    
+    wire[15:0] d_hit;
+    wire[15:0] d_miss;
+    
 	
 	wire IFID_Flush;
     wire IDEX_Flush;
+    
 
+	wire IDEX_enable;
+	wire EX_isFetched;
+	
 	// for debuging purpose
 	wire [`WORD_SIZE-1:0] num_inst;		// number of instruction during execution
 	wire [`WORD_SIZE-1:0] to_num_inst;		// number of instruction during execution
@@ -38,6 +68,10 @@ module cpu_TB();
 	// instantiate the unit under test
 	
 	//debugging
+	
+	wire set_dready;
+	
+	wire[1:0] ALUsrc1;
 	wire PC_enable;
 	
 	wire[15:0] IF_inst;
@@ -62,13 +96,16 @@ module cpu_TB();
 	           .i_writeM(i_writeM), 
 	           .i_address(i_address), 
 	           .i_data(i_data), 
+	           
 	           .d_readM(d_readM), 
 	           .d_writeM(d_writeM), 
 	           .d_address(d_address), 
 	           .d_data(d_data), 
+	           
 	           .i_ready(i_ready), 
 	           .d_ready(d_ready), 
 	           .d_count(d_count),
+	           
 	           
 	           .IDEX_Flush(IDEX_Flush),
                .IFID_Flush(IFID_Flush));		   
@@ -76,17 +113,42 @@ module cpu_TB();
 	cpu UUT (
 	         .Clk(clk), 
 	         .Reset_N(reset_n), 
+	         
+             .i_readC(i_readC),
+             .i_addrC(i_addrC),
+             .i_readyC(i_readyC),
+             .i_dataC(i_dataC),
+             
+             .d_readC(d_readC),
+             .d_writeC(d_writeC),
+             .d_addrC(d_addrC),
+             .d_readyC(d_readyC),
+             .d_dataC(d_dataC),
+
+             
 	         .i_readM(i_readM),
 	         .i_writeM(i_writeM), 
-	         .i_address(i_address), 
-	         .i_data(i_data), 
+	         .i_addrM(i_address), 
+	         .i_dataM(i_data),
+	          
 	         .d_readM(d_readM), 
 	         .d_writeM(d_writeM), 
-	         .d_address(d_address), 
-	         .d_data(d_data), 
+	         .d_addrM(d_address), 
+	         .d_dataM(d_data), 
 
-             .i_ready(i_ready), 
-             .d_ready(d_ready), 
+             .i_readyM(i_ready), 
+             .d_readyM(d_ready), 
+             
+             
+             .i_hit(i_hit),
+             .i_miss(i_miss),
+             .d_hit(d_hit),
+             .d_miss(d_miss),
+             
+
+             
+	         .EX_isFetched(EX_isFetched),
+	         .IDEX_enable(IDEX_enable),
 
 	         .num_inst(num_inst), 
 	         .to_num_inst(to_num_inst),
@@ -95,7 +157,8 @@ module cpu_TB();
 	         
 	         .IDEX_Flush(IDEX_Flush),
              .IFID_Flush(IFID_Flush),
-	         
+             
+             .ALUsrc1(ALUsrc1),
 	         .PC_enable(PC_enable),
 	         .IF_inst(IF_inst),
 	         .ID_inst(ID_inst),

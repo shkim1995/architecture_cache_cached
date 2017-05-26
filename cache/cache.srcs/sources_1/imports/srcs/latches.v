@@ -21,7 +21,7 @@ module latch(
     end
     
     always @(posedge clk) begin
-        if(flush) out<=0;
+        if(flush && enable) out<=0;
         else if(enable) out<=in;
         else out<=out;
         
@@ -47,7 +47,7 @@ module latch2(
     
         
     always @(posedge clk) begin
-        if(flush) out<=0;
+        if(flush && enable) out<=0;
         else if(enable) out<=in;
         else out<=out;
         
@@ -72,7 +72,7 @@ module latch1(
     end
     
     always @(posedge clk) begin
-        if(flush) out<=0;
+        if(flush && enable) out<=0;
         else if(enable) out<=in;
         else out<=out;
         
@@ -97,7 +97,7 @@ module latch4(
     
     
     always @(posedge clk) begin
-        if(flush) out<=0;
+        if(flush && enable) out<=0;
         else if(enable) out<=in;
         else out<=out;
         
@@ -280,18 +280,19 @@ module MEMWB(
      
      output MemtoReg_out,
      output RegWrite_out,
-          
+     
+     input enable,     
      input flush
      
 );
 
     
-    latch rdata(1, flush, clk, rdata_in, rdata_out); 
-    latch ALU(1, flush, clk, ALU_in, ALU_out); 
-    latch2 dist(1, flush, clk, dist_in, dist_out); 
+    latch rdata(enable, flush, clk, rdata_in, rdata_out); 
+    latch ALU(enable, flush, clk, ALU_in, ALU_out); 
+    latch2 dist(enable, flush, clk, dist_in, dist_out); 
 
-    latch1 MemtoReg(1, flush, clk, MemtoReg_in, MemtoReg_out);
-    latch1 RegWrite(1, flush, clk, RegWrite_in, RegWrite_out);
+    latch1 MemtoReg(enable, flush, clk, MemtoReg_in, MemtoReg_out);
+    latch1 RegWrite(enable, flush, clk, RegWrite_in, RegWrite_out);
     
     
 endmodule

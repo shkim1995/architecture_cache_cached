@@ -4,9 +4,11 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 `define I_LATENCY 6
-`define D_LATENCY 2
+`define D_LATENCY 6
 
-module Memory(clk,
+module Memory(
+             
+             clk,
              reset_n, 
              i_readM, 
              i_writeM, 
@@ -24,7 +26,11 @@ module Memory(clk,
              /*debugging*/
              i_count, 
              d_count, 
-             d_outputData);
+             d_outputData
+             
+             
+             );
+             
 	input clk;
 	wire clk;
 	input reset_n;
@@ -37,8 +43,8 @@ module Memory(clk,
 	wire i_writeM;
 	input [`WORD_SIZE-1:0] i_address;
 	wire [`WORD_SIZE-1:0] i_address;
-	inout i_data;
-	wire [`WORD_SIZE-1:0] i_data;
+	inout [`WORD_SIZE*4-1:0] i_data;
+	wire [`WORD_SIZE*4-1:0] i_data;
 	
 	// Data memory interface
 	input d_readM;
@@ -47,8 +53,8 @@ module Memory(clk,
 	wire d_writeM;
 	input [`WORD_SIZE-1:0] d_address;
 	wire [`WORD_SIZE-1:0] d_address;
-	inout d_data;
-	wire [`WORD_SIZE-1:0] d_data;
+	inout[`WORD_SIZE*4-1:0] d_data;
+	wire [`WORD_SIZE*4-1:0] d_data;
 	
 	input IFID_Flush;
 	wire IFID_Flush;
@@ -90,20 +96,25 @@ module Memory(clk,
 	
 	initial d_count <= `D_LATENCY;
 	
+//	reg set_dready;
+//	output set_dready;
+//	initial set_dready<=0;
+	
 	always @(d_address or d_readM or d_writeM) begin
 	
 	   if(d_readM || d_writeM) begin
-	       d_count<=`D_LATENCY;
-	       d_ready<=0;
+	       
+          d_count<=`D_LATENCY;
+          d_ready<=0;
 	   end
 	
 	end
 	
 	
 	reg [`WORD_SIZE-1:0] memory [0:`MEMORY_SIZE-1];
-	reg [`WORD_SIZE-1:0] i_outputData;
-	reg [`WORD_SIZE-1:0] d_outputData;
-	/*debugging*/ output[15:0] d_outputData;
+	reg [`WORD_SIZE*4-1:0] i_outputData;
+	reg [`WORD_SIZE*4-1:0] d_outputData;
+	/*debugging*/ output[63:0] d_outputData;
 	
 	assign i_data = i_readM?i_outputData:`WORD_SIZE'bz;
 	assign d_data = d_readM?d_outputData:`WORD_SIZE'bz;
@@ -296,7 +307,7 @@ module Memory(clk,
 				memory[16'hb1] <= 16'ha0aa;
 				
 				memory[16'hb2] <= 16'h41ff;
-				memory[16'hb3] <= 16'h2404;
+				memory[16'hb3] <= 16'h2404; //**
 				memory[16'hb4] <= 16'h6000;
 				memory[16'hb5] <= 16'h5001;
 				memory[16'hb6] <= 16'hf819;
@@ -327,7 +338,11 @@ module Memory(clk,
 				    
 				    else if(i_count==0) begin
 				        i_ready <= 1;
-				        i_outputData <= memory[i_address];
+				        i_outputData[63:48] = memory[(i_address[15:2])*4+0];
+				        i_outputData[47:32] = memory[(i_address[15:2])*4+1];
+				        i_outputData[31:16] = memory[(i_address[15:2])*4+2];
+				        i_outputData[15:0] = memory[(i_address[15:2])*4+3];
+				        $display("MEM OUTPUT : %h", i_outputData);
 				    end
 				
 				end
@@ -335,7 +350,6 @@ module Memory(clk,
 				if(i_writeM)memory[i_address] <= i_data;
 				
 				if(d_readM) begin 
-				    $display("MEM : read, %h, %h", d_address, memory[d_address]);
 				    
 				    if(d_count>0) begin
 				        d_count <= d_count-1;
@@ -343,7 +357,11 @@ module Memory(clk,
 				    
 				    else if(d_count==0) begin
 				        d_ready <= 1;
-				        d_outputData <= memory[d_address];
+				        d_outputData[63:48] = memory[(d_address[15:2])*4+0];
+                        d_outputData[47:32] = memory[(d_address[15:2])*4+1];
+                        d_outputData[31:16] = memory[(d_address[15:2])*4+2];
+                        d_outputData[15:0] = memory[(d_address[15:2])*4+3];
+//				        d_outputData <= memory[d_address];
 				    end
 				    
                    // $display("MEM : d_output %h", d_outputData);
@@ -361,4 +379,5 @@ module Memory(clk,
 				    
 			    end 
 			end
+			
 endmodule

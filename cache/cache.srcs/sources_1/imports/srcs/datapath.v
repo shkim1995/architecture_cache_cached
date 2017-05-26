@@ -51,7 +51,7 @@ module datapath(
     output IDEX_enable,
     
     //debugging
-    
+    output[1:0] ALUsrc1,
     output PC_enable,
     output[15:0] IFID_inst_in,
     output[15:0] IFID_inst_out,
@@ -89,6 +89,7 @@ module datapath(
     wire IDEX_enable;
     wire EXMEM_enable;
     
+    
     assign PC_enable = (!isStalled && i_ready && d_ready) || !reset_n || IFID_Flush;
     
     //always @(posedge clk) $display("SDDSADSADSADASD : %b, i_ready : %b, reset_n : %b", PC_enable, i_ready, reset_n); 
@@ -97,6 +98,8 @@ module datapath(
     assign IDEX_enable = d_ready;
     
     assign EXMEM_enable = d_ready;
+    
+    always @(posedge clk) $display("d_ready %b", d_ready);
     
 //    assign IFID_enable = 1;
     
@@ -389,6 +392,7 @@ forward FWD(
 stalling STU(
 
     .EX_MemRead(EX_MemRead),
+    .EX_MemWrite(EX_MemWrite),
     .EX_dest(EXMEM_RF_dist_in),
     .inst(IFID_inst_out),
     .isStalled(isStalled)
@@ -571,7 +575,8 @@ EXMEM exmem(
 MEMWB memwb(
     
     .clk(clk),
-    .flush(!d_ready),
+    .enable(d_ready),
+//    .flush(!d_ready),
     
     //data signals
     

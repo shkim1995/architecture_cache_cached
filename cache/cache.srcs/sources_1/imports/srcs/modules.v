@@ -85,8 +85,10 @@ endmodule
 module stalling(
 
     input EX_MemRead,
+    input EX_MemWrite,
     input[1:0] EX_dest,
     input[15:0] inst,
+    
     
     output isStalled
 );
@@ -120,6 +122,11 @@ always @(*) begin
     else if(EX_MemRead && ID_rt==EX_dest && use_rt) begin
         isStalled <= 1;
     end
+    
+//    //stalling only for debugging purpose
+//    else if((EX_MemRead || EX_MemRead) || (opcode==7 || opcode==8)) begin
+//        isStalled <= 1;
+//    end
     
     
     else begin
