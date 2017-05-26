@@ -137,6 +137,7 @@ module cpu(
     wire[`WORD_SIZE-1:0] d_addrC;
     wire d_readyC;
     wire[`WORD_SIZE-1:0] d_dataC;
+//    always @(posedge Clk) $display("DATAC in CPU : %b", d_dataC);
     
     
     Dcache dcache(
@@ -238,6 +239,11 @@ module cpu(
         if(EX_inst != 0) executed <= 1;
         if(EX_inst == 0) executed <= 0;
     end
+    
+    
+        
+    always @(posedge Clk) $display("NUMINSTRUCTION : %h", to_num_inst);
+        
     
     ////////////////////////////////////  
 

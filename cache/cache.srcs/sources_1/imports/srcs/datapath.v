@@ -99,13 +99,8 @@ module datapath(
     
     assign EXMEM_enable = d_ready;
     
-    always @(posedge clk) $display("d_ready %b", d_ready);
+//    always @(posedge clk) $display("d_ready %b", d_ready);
     
-//    assign IFID_enable = 1;
-    
-//    assign IDEX_enable = 1;
-    
-//    assign EXMEM_enable = 1;
     
     
     //Jump & Branch Addr
@@ -351,6 +346,9 @@ assign d_address = dmem_addr;
 assign d_readM = MEM_MemRead;
 assign d_writeM = MEM_MemWrite;
 
+//always @(posedge clk) $display("DATAC in DM : %b", d_data);
+//always @(posedge clk) $display("DATAC_write in DM : %b", dmem_wdata);
+//always @(posedge clk) $display("d_writeM : %b", d_writeM);
 
 //Reg
  RegisterFile rf(.addr1(RF_addr1), 

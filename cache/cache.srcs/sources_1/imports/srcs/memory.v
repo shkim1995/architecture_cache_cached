@@ -61,6 +61,7 @@ module Memory(
 	input IDEX_Flush;
 	wire IDEX_Flush;
 	
+	
 	//i_ready, d_read == 1 if ony mem value is valid
 	 
 	output i_ready;
@@ -99,7 +100,7 @@ module Memory(
 //	reg set_dready;
 //	output set_dready;
 //	initial set_dready<=0;
-	
+
 	always @(d_address or d_readM or d_writeM) begin
 	
 	   if(d_readM || d_writeM) begin
@@ -116,8 +117,8 @@ module Memory(
 	reg [`WORD_SIZE*4-1:0] d_outputData;
 	/*debugging*/ output[63:0] d_outputData;
 	
-	assign i_data = i_readM?i_outputData:`WORD_SIZE'bz;
-	assign d_data = d_readM?d_outputData:`WORD_SIZE'bz;
+	assign i_data = i_readM?i_outputData:64'bz;
+	assign d_data = d_readM?d_outputData:64'bz;
 	always @(d_outputData) 
         $display("MEM :d_output, %h", d_outputData);
 	always@(posedge clk)
@@ -374,7 +375,8 @@ module Memory(
                     
                     else if(d_count==0) begin
                         d_ready <= 1;
-                        memory[d_address] <= d_data;
+                        memory[d_address] <= d_data[15:0];
+                        $display("data saved in MEMORY : %h", d_data[15:0]);
                     end
 				    
 			    end 
